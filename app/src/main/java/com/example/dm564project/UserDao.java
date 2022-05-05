@@ -20,4 +20,7 @@ public interface UserDao {
 
     @Query("SELECT * FROM users")
     List<User> getAll();
+
+    @Query("SELECT EXISTS(SELECT * FROM users WHERE id=:uid)")
+    boolean doesExist(String uid);
 }
