@@ -15,7 +15,10 @@ public class DisplayMessageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 
+        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
+        UserDao userDao = db.userDao();
+
         TextView textView = findViewById(R.id.textView);
-        textView.setText(message);
+        textView.setText(userDao.findById(message).name);
     }
 }

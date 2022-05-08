@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Transaction;
 
 import java.util.List;
 
@@ -23,4 +24,8 @@ public interface UserDao {
 
     @Query("SELECT EXISTS(SELECT * FROM users WHERE id=:uid)")
     boolean doesExist(String uid);
+
+    @Transaction
+    @Query("SELECT * FROM users")
+    public List<UserWithPosts> getUserPosts();
 }

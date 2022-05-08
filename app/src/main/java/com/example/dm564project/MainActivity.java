@@ -13,16 +13,16 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.dm564project.MESSAGE";
 
-    //UserDao userDao = db.userDao();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
+        UserDao userDao = db.userDao();
     }
 
     public void createUser(View view){
-        //Intent intent = new Intent(this, DisplayMessageActivity.class);
+        Intent intent = new Intent(this, DisplayMessageActivity.class);
         AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
         UserDao userDao = db.userDao();
         EditText id = findViewById(R.id.editTextId);
@@ -30,13 +30,14 @@ public class MainActivity extends AppCompatActivity {
         String userid = id.getText().toString();
         String username = name.getText().toString();
 
-        if (  ) {
+        if ( userDao.doesExist(userid) ) {
             Toast.makeText(getApplicationContext(), "Username is already in use.", Toast.LENGTH_SHORT).show();
         } else {
-            //userDao.insert(new User(userid, username));
+            userDao.insert(new User(userid, username));
             Toast.makeText(getApplicationContext(), "User created", Toast.LENGTH_SHORT).show();
         }
-        //intent.putExtra(EXTRA_MESSAGE, userid);
-        //startActivity(intent);
+
+        intent.putExtra(EXTRA_MESSAGE, userid);
+        startActivity(intent);
     }
 }
