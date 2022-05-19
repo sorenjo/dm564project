@@ -19,4 +19,19 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return AppDB;
     }
+
+    public void populatePosts(){
+        Post post = new Post();
+        post.content = "noget mere post content";
+        post.id = 2;
+        post.user = "gaben";
+        AppDB.postDao().insert(post);
+
+        Post post2 = new Post();
+        post.content = "noget mere post content";
+        post.id = 1;
+        post.user = "gaben";
+        AppDB.postDao().insert(post2);
+
+    }
 }

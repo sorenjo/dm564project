@@ -14,5 +14,7 @@ public class Post {
 
     public String content;
 
-
+    public String toString(){
+        return id + user + content;
+    }
 }

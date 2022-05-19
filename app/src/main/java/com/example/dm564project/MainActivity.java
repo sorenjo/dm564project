@@ -17,13 +17,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
-        UserDao userDao = db.userDao();
+        //AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
+        //UserDao userDao = db.userDao();
     }
 
     public void createUser(View view){
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
+        Intent intent = new Intent(this, PostsActivity.class);
         AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
+        //db.populatePosts();
         UserDao userDao = db.userDao();
         EditText id = findViewById(R.id.editTextId);
         EditText name = findViewById(R.id.editTextName);
