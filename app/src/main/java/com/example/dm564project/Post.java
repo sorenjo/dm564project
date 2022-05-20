@@ -17,4 +17,12 @@ public class Post {
     public String toString(){
         return id + user + content;
     }
+
+    public Post(int id, String user, String content ){
+        this.id = id;
+        this.user = user;
+        this.content = content;
+    }
+    public Post(){
+    }
 }
