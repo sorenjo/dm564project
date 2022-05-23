@@ -13,4 +13,7 @@ public interface PostDao {
 
     @Query("SELECT * FROM posts")
     List<Post> getAll();
+
+    @Query("SELECT MIN(stamp) FROM posts")
+    long lastPostTime();
 }

@@ -28,4 +28,6 @@ public interface UserDao {
     @Transaction
     @Query("SELECT * FROM users")
     public List<UserWithPosts> getUserPosts();
+
+    //@Query("SELECT  FROM")
 }

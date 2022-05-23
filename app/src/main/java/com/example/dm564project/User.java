@@ -14,6 +14,8 @@ public class User {
 
     public String name;
 
+    //public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
+
     public User(String id, String name){
         this.id = id;
         this.name = name;
