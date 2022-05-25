@@ -27,6 +27,5 @@ public class PostsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(postAdaptor);
-
     }
 }

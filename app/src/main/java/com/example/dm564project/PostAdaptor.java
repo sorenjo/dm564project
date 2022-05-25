@@ -1,8 +1,10 @@
 package com.example.dm564project;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,13 +19,37 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
+        private final TextView textView2;
+        private final Button likeButton;
+        private Post post;
+
         public ViewHolder(View view){
             super(view);
             textView = view.findViewById(R.id.textView2);
+            textView2 = view.findViewById(R.id.textView3);
+            likeButton = view.findViewById(R.id.btnLike);
+            //TODO de andre reaktioner. Samme fremgangsmåde som btnLike.
+            likeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //reaction TODO
+                    System.out.println("----------------------- " + post.id + " was liked");
+                }
+            });
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("--------------- " + post.content + " was clicked" );
+                }
+            });
         }
 
         public TextView getTextView() {
             return textView;
+        }
+
+        public TextView getTextView2() {
+            return textView2;
         }
     }
 
@@ -40,7 +66,10 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.getTextView().setText(posts.get(position).toString());
+        holder.post = posts.get( position );
+        holder.getTextView().setText( holder.post.user + " :" ); //TODO Do not concatenate text displayed with `setText`. Use resource string with placeholders.
+        holder.getTextView2().setText( posts.get( position ).content );
+
     }
 
     @Override

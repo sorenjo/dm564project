@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.stream.Collectors;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Database(entities = {User.class, Post.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
@@ -28,13 +29,13 @@ public abstract class AppDatabase extends RoomDatabase {
     public static AppDatabase getAppDatabase(Context context){
         if (AppDB == null){
             AppDB = Room.databaseBuilder(context, AppDatabase.class, "hoply").fallbackToDestructiveMigration().allowMainThreadQueries().build(); // allowMainThreadQueries is probably suboptimal.
-            /* try { //TODO ved ikke lige hvornår man bør synche.
+            try { //TODO ved ikke lige hvornår man bør synche.
                 Thread t = new Thread(AppDatabase::syncDatabase);
                 t.start();
                 t.join();
             } catch( InterruptedException e) {
                 e.printStackTrace();
-            }*/
+            }
         }
         return AppDB;
     }
@@ -59,23 +60,25 @@ public abstract class AppDatabase extends RoomDatabase {
                 User user = new User(jsonObject.get("id").toString(), jsonObject.get("name").toString());
                 userDao.insert( user );
             }
+
+         */
            try{
             PostDao postDao = AppDB.postDao();
-            HttpURLConnection connection2 = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + Instant.ofEpochMilli( postDao.lastPostTime() ).toString() ).openConnection();
+            System.out.println( Instant.ofEpochMilli( postDao.lastPostTime() ) );
+            HttpURLConnection connection2 = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + Instant.ofEpochMilli( postDao.lastPostTime() ) ).openConnection();
             connection2.setRequestProperty("accept", "application/json");
             String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection2.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
             JSONArray jsonPostArray = new JSONArray( postJson );
 
             for( int i = 0; i < jsonPostArray.length(); i++){
                 JSONObject jsonObject = jsonPostArray.getJSONObject( i );
-                Post post = new Post( Integer.parseInt( jsonObject.get("id").toString() ), jsonObject.get("user_id").toString(), jsonObject.get("content").toString(), Instant.parse( jsonObject.get("stamp").toString() ).toEpochMilli() );
+                Post post = new Post( Integer.parseInt( jsonObject.get("id").toString() ), jsonObject.get("user_id").toString(), jsonObject.get("content").toString(), OffsetDateTime.parse( jsonObject.get("stamp").toString() ).toInstant().toEpochMilli() );
                 postDao.insert( post );//TODO måske det her bør nok gøres som én transaction, dvs tilføj en metode addall der indsætter et user[] i én transaction.
             }
 
         } catch( Exception e ) {
             e.printStackTrace();
         }
-         */
     }
 
     /*
@@ -105,7 +108,7 @@ public abstract class AppDatabase extends RoomDatabase {
             PostDao postDao = AppDB.postDao();
             HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/" + tableName + "?stamp=gt." + timeSince ).openConnection();
             connection.setRequestProperty("accept", "application/json");
-            String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection2.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
+            String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
             JSONArray jsonPostArray = new JSONArray( postJson );
 
             for( int i = 0; i < jsonPostArray.length(); i++){

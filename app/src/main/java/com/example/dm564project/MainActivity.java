@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.dm564project.MESSAGE";
+    private User currentUser = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
         if ( userDao.doesExist(userid) ) {
             Toast.makeText(getApplicationContext(), "Username is already in use.", Toast.LENGTH_SHORT).show();
         } else {
-            userDao.insert(new User(userid, username));
+            currentUser = new User( userid, username );
+            userDao.insert( currentUser );
             Toast.makeText(getApplicationContext(), "User created", Toast.LENGTH_SHORT).show();
         }
 
