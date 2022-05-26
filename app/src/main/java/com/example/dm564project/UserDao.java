@@ -5,29 +5,37 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import androidx.room.Update;
 
 import java.util.List;
 
 @Dao
 public interface UserDao {
     @Insert
-    void insert(User user);
+    void insert( User user );
 
     @Delete
-    void delete(User user);
+    void delete( User user );
 
-    @Query("SELECT * FROM users WHERE id=:uid")
-    User findById(String uid);
+    @Update
+    void update ( User user );
 
-    @Query("SELECT * FROM users")
-    List<User> getAll();
+    @Query( "SELECT * FROM users WHERE id=:uid" )
+    User findById( String uid );
 
-    @Query("SELECT EXISTS(SELECT * FROM users WHERE id=:uid)")
+    @Query( "SELECT * FROM users" )
+    List< User > getAll();
+
+    @Query( "SELECT EXISTS(SELECT * FROM users WHERE id=:uid)" )
     boolean doesExist(String uid);
 
     @Transaction
-    @Query("SELECT * FROM users")
-    public List<UserWithPosts> getUserPosts();
+    @Query( "SELECT * FROM users" )
+    List< UserWithPosts > getUserPosts();
 
-    //@Query("SELECT  FROM")
+    @Query( "SELECT MAX(stamp) FROM users" )
+    long lastUserCreateTime();
+
+    @Query( "SELECT * FROM users WHERE synced = 0" )
+    List< User > unSynced();
 }

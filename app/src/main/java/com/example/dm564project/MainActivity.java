@@ -12,19 +12,18 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.dm564project.MESSAGE";
-    private User currentUser = null;
+    private static AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
-        //UserDao userDao = db.userDao();
+        db = AppDatabase.getAppDatabase( getApplicationContext() );
+        db.syncDatabase();
     }
 
     public void createUser(View view){
         Intent intent = new Intent(this, PostsActivity.class);
-        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
         //db.populatePosts();
         UserDao userDao = db.userDao();
         EditText id = findViewById(R.id.editTextId);
@@ -35,12 +34,14 @@ public class MainActivity extends AppCompatActivity {
         if ( userDao.doesExist(userid) ) {
             Toast.makeText(getApplicationContext(), "Username is already in use.", Toast.LENGTH_SHORT).show();
         } else {
-            currentUser = new User( userid, username );
-            userDao.insert( currentUser );
+            User user = new User( userid, username, false, 0 );
+            userDao.insert( user );
+            db.syncDatabase();
+            User.active = user;
             Toast.makeText(getApplicationContext(), "User created", Toast.LENGTH_SHORT).show();
+            startActivity(intent);
         }
 
-        intent.putExtra(EXTRA_MESSAGE, userid);
-        startActivity(intent);
+
     }
 }

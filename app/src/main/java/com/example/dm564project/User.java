@@ -8,16 +8,27 @@ import java.util.Date;
 
 @Entity(tableName = "users")
 public class User {
+    public static User active;
+
     @PrimaryKey
     @NonNull
     public String id;
 
     public String name;
 
-    //public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
+    public boolean synced;
 
-    public User(String id, String name){
+    public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
+
+    public User(String id, String name, boolean synced, long stamp ){
         this.id = id;
         this.name = name;
+        this.synced = synced;
+        this.stamp = stamp;
+    }
+
+
+    public String toString(){
+        return id + " " + name + " " + synced + " " + stamp;
     }
 }
