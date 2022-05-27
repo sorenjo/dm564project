@@ -33,6 +33,10 @@ public interface UserDao {
     @Query( "SELECT * FROM users" )
     List< UserWithPosts > getUserPosts();
 
+    @Transaction
+    @Insert
+    void addAll( List< User > users );
+
     @Query( "SELECT MAX(stamp) FROM users" )
     long lastUserCreateTime();
 

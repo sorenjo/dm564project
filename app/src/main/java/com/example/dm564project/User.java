@@ -27,6 +27,13 @@ public class User {
         this.stamp = stamp;
     }
 
+    public User(){
+        id = "anon";
+        name = null;
+        synced = false;
+        stamp = 0;
+    }
+
 
     public String toString(){
         return id + " " + name + " " + synced + " " + stamp;

@@ -5,10 +5,12 @@ import androidx.room.Entity;
 
 @Entity(primaryKeys = {"user", "post"})
 public class Reaction {
+    public static int REACTION_DELETED = 0;
     public static int LIKE = 1;
     public static int HATE = 2;
     public static int COULDNT_CARE_LESS = 3;
-    public static int REACTION_DELETED = 0;
+
+    public static String[] reactionTexts = {" deleted their reaction on ", " likes ", " hates ", " couldn't care less about "};
 
     @NonNull
     public String user;

@@ -29,6 +29,11 @@ public class PostsActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        if( User.active == null) {
+            // user anonymous, posting disabled
+            findViewById( R.id.addPostButton ).setEnabled( false );
+            findViewById( R.id.editTextPostContent ).setEnabled( false );
+        }
         init();
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -47,13 +52,14 @@ public class PostsActivity extends AppCompatActivity {
     }
 
     public void createPost(View view){
-        Intent intent = new Intent(this, PostsActivity.class);
         AppDatabase db = AppDatabase.getAppDatabase( getApplicationContext() );
         PostDao postDao = db.postDao();
         EditText postContentEditText = findViewById( R.id.editTextPostContent );
 
         String postContent = postContentEditText.getText().toString();
+        postContentEditText.setText("Post content");
         postDao.insert( new Post( postDao.nextId(), User.active.id, postContent, 0, false ) );
-        startActivity( intent );
+        db.syncDatabase();
+        init();
     }
 }

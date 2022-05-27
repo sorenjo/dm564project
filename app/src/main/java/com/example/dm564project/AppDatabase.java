@@ -15,12 +15,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -37,14 +35,15 @@ public abstract class AppDatabase extends RoomDatabase {
         if (AppDB == null){
             AppDB = Room.databaseBuilder(context, AppDatabase.class, "hoply").fallbackToDestructiveMigration().allowMainThreadQueries().build(); // allowMainThreadQueries er sandsynligvis ret dumt.
         }
-        AppDB.syncDatabase();
+        //AppDB.syncDatabase();
         return AppDB;
     }
 
     /*
      * Sync database TODO: hvad sker der hvis man syncer mens man læser fra databasen?
      */
-    public synchronized void syncDatabase(){
+    public void syncDatabase(){
+        System.out.println("syncing database");
         try {
             Thread t1 = new Thread(AppDB::syncUserRelation);
             Thread t2 = new Thread(AppDB::syncPostRelation);
@@ -60,10 +59,10 @@ public abstract class AppDatabase extends RoomDatabase {
     /*
      * Sync user relation of local database.
      */
-    public void syncUserRelation() {
+    private void syncUserRelation() {
         UserDao userDao = userDao();
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/users?stamp=gt." + Instant.ofEpochMilli(userDao.lastUserCreateTime())).openConnection();
+        try { // download users
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/users?stamp=gt." + Instant.ofEpochMilli(userDao.lastUserCreateTime() ) ).openConnection();
             connection.setRequestProperty("accept", "application/json");
             InputStream is = connection.getInputStream();
             String userJson = new BufferedReader(new InputStreamReader(new BufferedInputStream(is))).lines().collect(Collectors.joining("\n"));
@@ -74,33 +73,44 @@ public abstract class AppDatabase extends RoomDatabase {
             System.out.println(jsonUserArray.toString(2));
             //System.out.println("der er " + jsonUserArray.length()+ " jsonobjekter i json arrayet");
 
+            List< User > users = new ArrayList<>();
+
             for (int i = 0; i < jsonUserArray.length(); i++) {
                 JSONObject jsonObject = jsonUserArray.getJSONObject(i);
-                User user = new User(jsonObject.get("id").toString(), jsonObject.get("name").toString(), true, OffsetDateTime.parse(jsonObject.get("stamp").toString()).toInstant().toEpochMilli());
-                userDao.insert(user); // burde nok gøres som én transaction.
+                User user = new User(jsonObject.get("id").toString(), jsonObject.get("name").toString(), true, OffsetDateTime.parse(jsonObject.get("stamp").toString()).toInstant().toEpochMilli() );
+                users.add( user );
             }
+            userDao.addAll( users );
             connection.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
             //synch failed
         }
 
-        //userDao.getAll().forEach( System.out::println );
+        // upload users
 
         List< User > usersToSync = userDao.unSynced();
-        System.out.println("user upload sync");
-        usersToSync.forEach(System.out::println);
-
         try {
-            URL url = new URL("https://caracal.imada.sdu.dk/app2022/users");
+            URL url = new URL( "https://caracal.imada.sdu.dk/app2022/users" );
             for (int i = 0; i < usersToSync.size(); i++) {
                 User user = usersToSync.get(i);
                 JSONObject userJson = new JSONObject();
                 userJson.accumulate("id", user.id);
                 userJson.accumulate("name", user.name);
-                if (syncDatabaseUp(url, userJson)) {
+                if ( syncDatabaseUp( url, userJson ) ) {
+                    // Nu hvor useren er blevet indsat på serveren har den også fået et stamp som nu downloades og indsættes i den lokale database.
+                    try{
+                        URL downURL = new URL( "https://caracal.imada.sdu.dk/app2022/users?id=eq." + user.id );
+                        HttpURLConnection connection = (HttpURLConnection) downURL.openConnection();
+                        connection.setRequestProperty( "accept", "application/json" );
+                        String downUser = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") );
+                        JSONObject downUserJson = new JSONArray( downUser ).getJSONObject( 0 ); // siden id er unikt ved vi at vi får et jsonarray af længde 1, hvorfor det ligger på indeks 0.
+                        user.stamp = OffsetDateTime.parse( downUserJson.get( "stamp" ).toString() ).toInstant().toEpochMilli();
+                    } catch( IOException e ){
+                        e.printStackTrace();
+                    }
                     user.synced = true;
-                    userDao.update(user);
+                    userDao.update( user );
                 }
                 System.out.println(user.id + " " + user.name + " " + user.synced);
             }
@@ -108,13 +118,13 @@ public abstract class AppDatabase extends RoomDatabase {
             e.printStackTrace();
         }
     }
-    public void syncPostRelation(){
+    private void syncPostRelation(){
         PostDao postDao = postDao();
         try{
             System.out.println( Instant.ofEpochMilli( postDao.lastPostTime() ) );
-            HttpURLConnection connection2 = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + Instant.ofEpochMilli( postDao.lastPostTime() ) ).openConnection();
-            connection2.setRequestProperty("accept", "application/json");
-            String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection2.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + Instant.ofEpochMilli( postDao.lastPostTime() ) ).openConnection();
+            connection.setRequestProperty("accept", "application/json");
+            String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
             JSONArray jsonPostArray = new JSONArray( postJson );
 
             for( int i = 0; i < jsonPostArray.length(); i++){
@@ -153,7 +163,7 @@ public abstract class AppDatabase extends RoomDatabase {
     /*
      * Upload local information to remote database. TODO
      */
-    public boolean syncDatabaseUp( URL url, JSONObject payload ) {
+    private boolean syncDatabaseUp( URL url, JSONObject payload ) {
         boolean success = false;
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -167,7 +177,7 @@ public abstract class AppDatabase extends RoomDatabase {
             os.flush();
             os.close();
             System.out.println(connection.getResponseCode() + " " + connection.getResponseMessage() );
-            if ( connection.getResponseCode() == HttpURLConnection.HTTP_OK )
+            if ( connection.getResponseCode() == HttpURLConnection.HTTP_CREATED )
                 success = true;
             connection.disconnect();
         } catch ( IOException e ){
@@ -179,7 +189,7 @@ public abstract class AppDatabase extends RoomDatabase {
     /*
      * Download remote content to local database. TODO
      */
-    public void syncDatabaseDown( URL url, String tableName, long timeSince ) {
+    private void syncDatabaseDown( URL url, String tableName, long timeSince ) {
         try{
             PostDao postDao = AppDB.postDao();
             HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/" + tableName + "?stamp=gt." + timeSince ).openConnection();
