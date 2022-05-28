@@ -24,14 +24,16 @@ public class MainActivity extends AppCompatActivity {
     public void createUser(View view) {
         AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
         UserDao userDao = db.userDao();
+
         EditText id = findViewById(R.id.editTextId);
         EditText name = findViewById(R.id.editTextName);
+
         String userid = id.getText().toString();
         String username = name.getText().toString();
 
-        if (userDao.doesExist(userid)) {
-            Toast.makeText(getApplicationContext(), "Username is already in use.", Toast.LENGTH_SHORT).show();
-        } else {
+        if (userDao.doesExist(userid))
+            Toast.makeText(getApplicationContext(), "Username is already in use", Toast.LENGTH_SHORT).show();
+        else {
             User user = new User(userid, username, false, 0);
             userDao.insert(user);
             User.active = user;
@@ -41,8 +43,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void continueAsAnonUser( View view) {
+    public void continueAsAnonUser(View view) {
         User.active = null;
+        gotoPosts( view );
     }
 
     public void gotoPosts(View view){

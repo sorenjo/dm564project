@@ -36,22 +36,19 @@ public class PostsActivity extends AppCompatActivity {
         }
         init();
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeRefreshLayout.setRefreshing( false );
-                db.syncDatabase();
-                init();
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            swipeRefreshLayout.setRefreshing( false );
+            db.syncDatabase();
+            init();
         });
     }
 
-    private void init(){
+    private void init() {
         PostAdaptor postAdaptor = new PostAdaptor(db.postDao().getAll());
         recyclerView.setAdapter(postAdaptor);
     }
 
-    public void createPost(View view){
+    public void createPost(View view) {
         AppDatabase db = AppDatabase.getAppDatabase( getApplicationContext() );
         PostDao postDao = db.postDao();
         EditText postContentEditText = findViewById( R.id.editTextPostContent );

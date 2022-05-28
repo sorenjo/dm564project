@@ -22,33 +22,53 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
         private final TextView textView;
         private final TextView textView2;
         private final Button likeButton;
+        private final Button hateButton;
+        private final Button careButton;
+        private final Button unreactButton;
         private Post post;
 
         public ViewHolder(View view){
             super(view);
+
             textView = view.findViewById(R.id.textView2);
             textView2 = view.findViewById(R.id.textView3);
             likeButton = view.findViewById(R.id.btnLike);
+            hateButton = view.findViewById(R.id.btnHate);
+            careButton = view.findViewById(R.id.btnCare);
+            unreactButton = view.findViewById(R.id.btnUnreact);
+
+            if( User.active == null) {
+                // user anonymous, reacting disabled
+                likeButton.setVisibility( View.GONE );
+                hateButton.setVisibility( View.GONE );
+                careButton.setVisibility( View.GONE );
+                unreactButton.setVisibility( View.GONE );
+            }
+
             AppDatabase db = AppDatabase.getAppDatabase( view.getContext() );
             ReactionDao reactionDao = db.reactionDao();
-            //TODO de andre reaktioner. Samme fremgangsmåde som btnLike.
-            likeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //reaction TODO
-                    System.out.println("----------------------- " + post.id + " was liked");
-                    reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.LIKE ));
-                }
+
+            likeButton.setOnClickListener(v -> {
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.LIKE ));
             });
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("--------------- " + post.content + " was clicked" );
-                    Context context = view.getContext();
-                    Intent intent = new Intent( context, PostDetailActivity.class );
-                    intent.putExtra("postId", post.id );//TODO det her navn bør nok være en konstant tilhørende den her klasse.
-                    context.startActivity(intent);
-                }
+
+            hateButton.setOnClickListener(v -> {
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.HATE ));
+            });
+
+            careButton.setOnClickListener(v -> {
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.COULDNT_CARE_LESS ));
+            });
+
+            unreactButton.setOnClickListener(v -> {
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.REACTION_DELETED ));
+            });
+
+            view.setOnClickListener(v -> {
+                Context context = v.getContext();
+                Intent intent = new Intent( context, PostDetailActivity.class );
+                intent.putExtra("postId", post.id );//TODO det her navn bør nok være en konstant tilhørende den her klasse.
+                context.startActivity(intent);
             });
         }
 

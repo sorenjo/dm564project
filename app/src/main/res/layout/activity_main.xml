@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:layout_marginTop="52dp"
-        android:onClick="gotoPosts"
+        android:onClick="continueAsAnonUser"
         android:text="Continue as anonymous user"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextName" />
