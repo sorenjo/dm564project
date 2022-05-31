@@ -55,7 +55,7 @@ public class PostsActivity extends AppCompatActivity {
 
         String postContent = postContentEditText.getText().toString();
         postContentEditText.setText("Post content");
-        postDao.insert( new Post( postDao.nextId(), User.active.id, postContent, 0, false ) );
+        postDao.insert( new Post( postDao.nextId(), User.active.id, postContent, false, 0, 0) );
         db.syncDatabase();
         init();
     }

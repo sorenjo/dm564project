@@ -16,12 +16,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 
 @Database(entities = {User.class, Post.class, Reaction.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
@@ -40,25 +42,137 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     /*
-     * Sync database TODO: hvad sker der hvis man syncer mens man læser fra databasen?
+     * Sync database
      */
     public void syncDatabase(){
         System.out.println("syncing database");
         try {
-            Thread t1 = new Thread(AppDB::syncUserRelation);
-            Thread t2 = new Thread(AppDB::syncPostRelation);
+            Thread t1 = new Thread(AppDB::syncDownUpUser);
+            Thread t2 = new Thread(AppDB::syncDownUpPost);
+            Thread t3 = new Thread(AppDB::syncDownUpReaction);
             t1.start();
             t2.start();
+            t3.start();
             t1.join();
             t2.join();
+            t3.join();
         } catch( InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     /*
-     * Sync user relation of local database.
+     * Synchronizes the user relation of this database.
      */
+    private void syncDownUpUser(){
+        System.out.println("---------------------------- user sync --------------------");
+        UserDao userDao = userDao();
+        try{
+            //download users
+            getMultiApplyConsume(
+                new URL("https://caracal.imada.sdu.dk/app2022/users?stamp=gt." + DBEntity.instant(userDao.latest())),
+                User::ofJSONObject,
+                userDao::addAll
+            );
+            //upload users
+            userDao.unSynced().stream().map(User::toJSONObject).filter(jsonObject -> {
+                boolean success = false;
+                try {
+                    success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/users"), jsonObject) == HttpURLConnection.HTTP_CREATED;
+                } catch(MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                return success;
+            })
+            .forEach(jsonObject -> {
+                try {
+                    getSingleApplyConsume(
+                        new URL("https://caracal.imada.sdu.dk/app2022/users?id=eq."+ jsonObject.getString("id")),
+                        User::ofJSONObject,
+                        userDao::update
+                        );
+                } catch(Exception e){
+                    e.printStackTrace();
+                }
+            });
+        } catch ( Exception e ){
+            e.printStackTrace();
+        }
+    }
+
+    private void syncDownUpPost(){
+        PostDao postDao = postDao();
+        // download posts
+        try{
+            getMultiApplyConsume(
+                new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + DBEntity.instant(postDao.latest())),
+                Post::ofJSONObject,
+                postDao::addAll
+            );
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        //upload posts
+        postDao.unSynced().stream().map(Post::toJSONObject).filter(jsonObject -> {
+            boolean success = false;
+            try{
+                success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/posts"), jsonObject) == HttpURLConnection.HTTP_CREATED;
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            return success;
+        })
+        .forEach(jsonObject -> {
+            try{
+                getSingleApplyConsume(
+                    new URL("https://caracal.imada.sdu.dk/app2022/posts?id=eq." + jsonObject.getString("id")),
+                    Post::ofJSONObject,
+                    postDao::update
+                );
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void syncDownUpReaction(){
+        ReactionDao reactionDao = reactionDao();
+        //download reactions
+        try{
+            getMultiApplyConsume(
+                new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest())),
+                Reaction::ofJSONObject,
+                reactionDao::addAll
+            );
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        //upload reactions
+        reactionDao.unSynced().stream().map(Reaction::toJSONObject).filter(jsonObject -> {
+            boolean success = false;
+            try{
+                success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/reactions"), jsonObject) == HttpURLConnection.HTTP_CREATED;
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            return success;
+        })
+        .forEach(jsonObject -> {
+            try{
+                getSingleApplyConsume(
+                    new URL("https://caracal.imada.sdu.dk/app2022/reactions?user_id=eq." + jsonObject.getString("user_id") + "&post_id=eq." + jsonObject.getString("post_id")),
+                    Reaction::ofJSONObject,
+                    reactionDao::update
+                );
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /*
+     * Sync user relation of local database.
+     *
     private void syncUserRelation() {
         UserDao userDao = userDao();
         try { // download users
@@ -121,7 +235,7 @@ public abstract class AppDatabase extends RoomDatabase {
     private void syncPostRelation(){
         PostDao postDao = postDao();
         try{
-            System.out.println( Instant.ofEpochMilli( postDao.lastPostTime() ) );
+            //System.out.println( Instant.ofEpochMilli( postDao.lastPostTime() ) );
             HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + Instant.ofEpochMilli( postDao.lastPostTime() ) ).openConnection();
             connection.setRequestProperty("accept", "application/json");
             String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
@@ -129,8 +243,8 @@ public abstract class AppDatabase extends RoomDatabase {
 
             for( int i = 0; i < jsonPostArray.length(); i++){
                 JSONObject jsonObject = jsonPostArray.getJSONObject( i );
-                Post post = new Post( Integer.parseInt( jsonObject.get("id").toString() ), jsonObject.get("user_id").toString(), jsonObject.get("content").toString(), OffsetDateTime.parse( jsonObject.get("stamp").toString() ).toInstant().toEpochMilli(), true );
-                postDao.insert( post );//TODO måske det her bør nok gøres som én transaction, dvs tilføj en metode addall der indsætter et user[] i én transaction.
+                Post post = new Post( Integer.parseInt( jsonObject.get("id").toString() ), jsonObject.get("user_id").toString(), jsonObject.get("content").toString(), true, OffsetDateTime.parse( jsonObject.get("stamp").toString() ).toInstant().toEpochMilli());
+                postDao.insert( post );//TODO måske det her bør nok gøres som én transaction, dvs tilføj en metode addall der indsætter et post[] i én transaction.
             }
 
         } catch( Exception e ) {
@@ -157,14 +271,53 @@ public abstract class AppDatabase extends RoomDatabase {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+     */
 
+    /*
+     * Downloads jsonarray from given url, applies the given function on each element, accumulates that to a list then consumes it using the given consumer.
+     */
+    private <E> void getMultiApplyConsume(URL url, Function<JSONObject, E> function, Consumer<List<E>> consumer){
+        try{
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("accept", "application/json");
+            InputStream is = connection.getInputStream();
+            String json = new BufferedReader(new InputStreamReader( new BufferedInputStream(is))).lines().collect(Collectors.joining("\n"));
+            is.close();
+            connection.disconnect();
+            JSONArray jsonArray = new JSONArray(json);
+            List<E> elements = new ArrayList<>();
+            for(int i = 0; i < jsonArray.length(); i++)
+                elements.add(function.apply(jsonArray.getJSONObject(i)));
+            consumer.accept(elements);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /*
-     * Upload local information to remote database. TODO
+     * Gets a the first element from the given url's jsonarray and applies given function before consuming it with the given consumer.
      */
-    private boolean syncDatabaseUp( URL url, JSONObject payload ) {
-        boolean success = false;
+    private <E> void getSingleApplyConsume(URL url, Function<JSONObject, E> function, Consumer<E> consumer){
+        try{
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("accept", "application/json");
+            String json = new BufferedReader(new InputStreamReader( new BufferedInputStream(connection.getInputStream()))).lines().collect(Collectors.joining("\n"));
+            JSONObject jsonObject = new JSONArray(json).getJSONObject(0);
+            E element = function.apply(jsonObject);
+            consumer.accept(element);
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Perform a post with the given payload to the given url.
+     * Precondition: the url is a http/s url.
+     * @return the http response code.
+     */
+    private int postTo(URL url, JSONObject payload ) {
+        int status = 0;
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput( true );
@@ -177,35 +330,12 @@ public abstract class AppDatabase extends RoomDatabase {
             os.flush();
             os.close();
             System.out.println(connection.getResponseCode() + " " + connection.getResponseMessage() );
-            if ( connection.getResponseCode() == HttpURLConnection.HTTP_CREATED )
-                success = true;
+            status = connection.getResponseCode();
             connection.disconnect();
         } catch ( IOException e ){
             e.printStackTrace();
         }
-        return success;
-    }
-
-    /*
-     * Download remote content to local database. TODO
-     */
-    private void syncDatabaseDown( URL url, String tableName, long timeSince ) {
-        try{
-            PostDao postDao = AppDB.postDao();
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://caracal.imada.sdu.dk/app2022/" + tableName + "?stamp=gt." + timeSince ).openConnection();
-            connection.setRequestProperty("accept", "application/json");
-            String postJson = new BufferedReader( new InputStreamReader( new BufferedInputStream( connection.getInputStream() ) ) ).lines().collect( Collectors.joining("\n") ); // det er nok ret hukommelsesintensivt at konvertere inputstreamen til en string. Det ville nok være at foretrække at parse det her som en inputstream.
-            JSONArray jsonPostArray = new JSONArray( postJson );
-
-            for( int i = 0; i < jsonPostArray.length(); i++){
-                JSONObject jsonObject = jsonPostArray.getJSONObject( i );
-                Post post = new Post( Integer.parseInt( jsonObject.get("id").toString() ), jsonObject.get("user_id").toString(), jsonObject.get("content").toString(), Instant.parse( jsonObject.get("stamp").toString() ).toEpochMilli(), true );
-                postDao.insert( post );//TODO måske det her bør nok gøres som én transaction, dvs tilføj en metode addall der indsætter et user[] i én transaction.
-            }
-
-        } catch( Exception e ) {
-            e.printStackTrace();
-        }
+        return status;
     }
 
     public void populatePosts(){

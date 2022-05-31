@@ -26,6 +26,7 @@ public interface UserDao {
     @Query( "SELECT * FROM users" )
     List< User > getAll();
 
+    @Transaction
     @Query( "SELECT EXISTS(SELECT * FROM users WHERE id=:uid)" )
     boolean doesExist(String uid);
 
@@ -37,8 +38,8 @@ public interface UserDao {
     @Insert
     void addAll( List< User > users );
 
-    @Query( "SELECT MAX(stamp) FROM users" )
-    long lastUserCreateTime();
+    @Query( "SELECT * FROM users ORDER BY seconds DESC, nanos DESC LIMIT 1" )
+    User latest();
 
     @Query( "SELECT * FROM users WHERE synced = 0" )
     List< User > unSynced();

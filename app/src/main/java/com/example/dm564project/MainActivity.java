@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         if (userDao.doesExist(userid))
             Toast.makeText(getApplicationContext(), "Username is already in use", Toast.LENGTH_SHORT).show();
         else {
-            User user = new User(userid, username, false, 0);
+            User user = new User(userid, username, false, 0, 0);
             userDao.insert(user);
             User.active = user;
             Toast.makeText(getApplicationContext(), "User created", Toast.LENGTH_SHORT).show();

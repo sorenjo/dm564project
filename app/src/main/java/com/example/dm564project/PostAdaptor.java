@@ -49,19 +49,19 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
             ReactionDao reactionDao = db.reactionDao();
 
             likeButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.LIKE ));
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.LIKE, false ));
             });
 
             hateButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.HATE ));
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.HATE, false ));
             });
 
             careButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.COULDNT_CARE_LESS ));
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.COULDNT_CARE_LESS, false ));
             });
 
             unreactButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.REACTION_DELETED ));
+                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.REACTION_DELETED, false ));
             });
 
             view.setOnClickListener(v -> {
