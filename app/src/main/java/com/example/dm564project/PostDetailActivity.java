@@ -40,7 +40,7 @@ public class PostDetailActivity extends AppCompatActivity {
         recyclerViewComments = findViewById(R.id.recyclerViewComments);
         recyclerViewComments.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerViewComments.setItemAnimator(new DefaultItemAnimator());
-System.out.println("bruh");
+
         if( User.active == null) {
             // user anonymous, posting disabled
             findViewById( R.id.addCommentButton ).setEnabled( false );
@@ -53,7 +53,7 @@ System.out.println("bruh");
     private void init() {
         ReactionAdaptor reactionAdaptor = new ReactionAdaptor( db.reactionDao().getFor(post.id) );
         recyclerViewReactions.setAdapter(reactionAdaptor);
-        CommentAdaptor commentAdaptor = new CommentAdaptor( db.commentDao().getAll() );
+        CommentAdaptor commentAdaptor = new CommentAdaptor( db.commentDao().getFromPost(post.id) );
         recyclerViewComments.setAdapter(commentAdaptor);
     }
 

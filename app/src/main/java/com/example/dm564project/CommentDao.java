@@ -18,6 +18,9 @@ public interface CommentDao {
     @Query("SELECT * FROM comments")
     List<Comment> getAll();
 
+    @Query("SELECT * FROM comments WHERE postId=:postId")
+    List<Comment> getFromPost( int postId );
+
     @Query("SELECT MAX(stamp) FROM comments")
     long lastComment();
 
