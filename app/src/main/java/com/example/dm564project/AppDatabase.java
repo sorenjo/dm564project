@@ -24,14 +24,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
-@Database(entities = {User.class, Post.class, Reaction.class}, version = 1)
+@Database(entities = {User.class, Post.class, Reaction.class, Comment.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase AppDB;
 
     public abstract UserDao userDao();
     public abstract PostDao postDao();
     public abstract ReactionDao reactionDao();
+    public abstract CommentDao commentDao();
 
     public static AppDatabase getAppDatabase(Context context){
         if (AppDB == null){
@@ -342,13 +344,13 @@ public abstract class AppDatabase extends RoomDatabase {
         Post post = new Post();
         post.content = "noget post content";
         post.id = 2;
-        post.user_id = "gaben";
+        post.userId = "gaben";
         AppDB.postDao().insert(post);
 
         Post post2 = new Post();
         post.content = "noget mere post content";
         post.id = 1;
-        post.user_id = "gaben";
+        post.userId = "gaben";
         AppDB.postDao().insert(post2);
 
     }

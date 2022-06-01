@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
-@Entity(primaryKeys = {"user", "post"})
+@Entity(tableName = "reactions", primaryKeys = {"userId", "postId"})
 public class Reaction extends DBEntity {
     public static int REACTION_DELETED = 0;
     public static int LIKE = 1;
@@ -19,9 +19,10 @@ public class Reaction extends DBEntity {
     public static String[] reactionTexts = {" deleted their reaction on ", " likes ", " hates ", " couldn't care less about "};
 
     @NonNull
-    public String user;
+    public String userId;
 
-     public int post;
+    @NonNull
+    public int postId;
 
     public int type;
 
@@ -36,9 +37,9 @@ public class Reaction extends DBEntity {
     public Reaction(){
     }
 
-    public Reaction( String user, int post, int type, boolean synced ){
-        this.user = user;
-        this.post = post;
+    public Reaction( String userId, int postId, int type, boolean synced ){
+        this.userId = userId;
+        this.postId = postId;
         this.type = type;
         this.synced = synced;
     }
@@ -46,8 +47,8 @@ public class Reaction extends DBEntity {
     public static Reaction ofJSONObject(JSONObject jsonObject){
         Reaction reaction = new Reaction();
         try{
-            reaction.user = jsonObject.getString("user_id");
-            reaction.post = jsonObject.getInt("post_id");
+            reaction.userId = jsonObject.getString("user_id");
+            reaction.postId = jsonObject.getInt("post_id");
             reaction.type = jsonObject.getInt("type");
             Instant instant = OffsetDateTime.parse(jsonObject.getString("stamp")).toInstant();
             reaction.seconds = instant.getEpochSecond();
@@ -62,8 +63,8 @@ public class Reaction extends DBEntity {
     public static JSONObject toJSONObject(Reaction reaction){
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.accumulate("user_id", reaction.user);
-            jsonObject.accumulate("post_id", reaction.post);
+            jsonObject.accumulate("user_id", reaction.userId);
+            jsonObject.accumulate("post_id", reaction.postId);
             jsonObject.accumulate("type", reaction.type);
         } catch (JSONException e){
             e.printStackTrace();

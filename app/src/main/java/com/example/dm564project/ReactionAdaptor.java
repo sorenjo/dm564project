@@ -41,7 +41,7 @@ public class ReactionAdaptor extends RecyclerView.Adapter<ReactionAdaptor.Reacti
     @Override
     public void onBindViewHolder(@NonNull ReactionViewHolder holder, int position){
         holder.reaction = reactions.get( position );
-        holder.getReactionTextView().setText( holder.reaction.user + Reaction.reactionTexts[ holder.reaction.type ] + "this post" );
+        holder.getReactionTextView().setText( holder.reaction.userId + Reaction.reactionTexts[ holder.reaction.type ] + "this post" );
     }
 
     @Override

@@ -16,7 +16,7 @@ public interface PostDao {
     @Update
     void update(Post post);
 
-    @Query("SELECT * FROM posts")
+    @Query("SELECT * FROM posts ORDER BY seconds DESC, nanos DESC")
     List<Post> getAll();
 
     @Query("SELECT * FROM posts ORDER BY seconds DESC, nanos DESC LIMIT 1")

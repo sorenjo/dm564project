@@ -14,9 +14,10 @@ import android.widget.EditText;
 import java.util.List;
 
 public class PostsActivity extends AppCompatActivity {
-    SwipeRefreshLayout swipeRefreshLayout;
-    RecyclerView recyclerView;
-    AppDatabase db;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recyclerView;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +30,13 @@ public class PostsActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
         if( User.active == null) {
             // user anonymous, posting disabled
             findViewById( R.id.addPostButton ).setEnabled( false );
             findViewById( R.id.editTextPostContent ).setEnabled( false );
         }
+
         init();
 
         swipeRefreshLayout.setOnRefreshListener(() -> {

@@ -28,13 +28,13 @@ public class MainActivity extends AppCompatActivity {
         EditText id = findViewById(R.id.editTextId);
         EditText name = findViewById(R.id.editTextName);
 
-        String userid = id.getText().toString();
+        String userId = id.getText().toString();
         String username = name.getText().toString();
 
-        if (userDao.doesExist(userid))
+        if (userDao.doesExist(userId))
             Toast.makeText(getApplicationContext(), "Username is already in use", Toast.LENGTH_SHORT).show();
         else {
-            User user = new User(userid, username, false, 0, 0);
+            User user = new User(userId, username, false, 0, 0);
             userDao.insert(user);
             User.active = user;
             Toast.makeText(getApplicationContext(), "User created", Toast.LENGTH_SHORT).show();

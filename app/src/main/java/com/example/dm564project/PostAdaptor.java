@@ -21,10 +21,7 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final TextView textView2;
-        private final Button likeButton;
-        private final Button hateButton;
-        private final Button careButton;
-        private final Button unreactButton;
+
         private Post post;
 
         public ViewHolder(View view){
@@ -32,10 +29,11 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
             textView = view.findViewById(R.id.textView2);
             textView2 = view.findViewById(R.id.textView3);
-            likeButton = view.findViewById(R.id.btnLike);
-            hateButton = view.findViewById(R.id.btnHate);
-            careButton = view.findViewById(R.id.btnCare);
-            unreactButton = view.findViewById(R.id.btnUnreact);
+
+            Button likeButton = view.findViewById(R.id.btnLike);
+            Button hateButton = view.findViewById(R.id.btnHate);
+            Button careButton = view.findViewById(R.id.btnCare);
+            Button unreactButton = view.findViewById(R.id.btnUnreact);
 
             if( User.active == null) {
                 // user anonymous, reacting disabled
@@ -81,7 +79,6 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
         }
     }
 
-
     public PostAdaptor(List<Post> posts){
         this.posts = posts;
     }
@@ -95,7 +92,7 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.post = posts.get( position );
-        holder.getTextView().setText( holder.post.user_id + " :" ); //TODO Do not concatenate text displayed with `setText`. Use resource string with placeholders.
+        holder.getTextView().setText( holder.post.userId + " :" ); //TODO Do not concatenate text displayed with `setText`. Use resource string with placeholders.
         holder.getTextView2().setText( posts.get( position ).content );
 
     }
