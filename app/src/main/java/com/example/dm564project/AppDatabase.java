@@ -67,7 +67,6 @@ public abstract class AppDatabase extends RoomDatabase {
      * Synchronizes the user relation of this database.
      */
     private void syncDownUpUser(){
-        System.out.println("---------------------------- user sync --------------------");
         UserDao userDao = userDao();
         try{
             //download users
@@ -140,6 +139,9 @@ public abstract class AppDatabase extends RoomDatabase {
     private void syncDownUpReaction(){
         ReactionDao reactionDao = reactionDao();
         //download reactions
+        List<Reaction> reactions = reactionDao.getAll();
+        System.out.println("number of reactions: " + reactions.size());
+        reactions.forEach(System.out::println);
         try{
             getMultiApplyConsume(
                 new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest())),

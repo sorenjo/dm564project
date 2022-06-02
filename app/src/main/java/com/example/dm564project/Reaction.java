@@ -28,12 +28,6 @@ public class Reaction extends DBEntity {
 
     public boolean synced;
 
-    //public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
-
-    public long seconds; // Creation time of this user in seconds since the epoch of 1970-01-01T00:00:00Z
-
-    public int nanos; // The nanosecond component of the creation time. Always between 0 and 999 999 999.
-
     public Reaction(){
     }
 
@@ -42,6 +36,8 @@ public class Reaction extends DBEntity {
         this.postId = postId;
         this.type = type;
         this.synced = synced;
+        this.seconds = 0;
+        this.nanos = 0;
     }
 
     public static Reaction ofJSONObject(JSONObject jsonObject){
@@ -52,7 +48,7 @@ public class Reaction extends DBEntity {
             reaction.type = jsonObject.getInt("type");
             Instant instant = OffsetDateTime.parse(jsonObject.getString("stamp")).toInstant();
             reaction.seconds = instant.getEpochSecond();
-            reaction.seconds = instant.getNano();
+            reaction.nanos = instant.getNano();
             reaction.synced = true;
         } catch(JSONException e){
             e.printStackTrace();
@@ -70,5 +66,9 @@ public class Reaction extends DBEntity {
             e.printStackTrace();
         }
         return jsonObject;
+    }
+
+    public String toString(){
+        return userId + postId + type + synced + seconds + nanos;
     }
 }

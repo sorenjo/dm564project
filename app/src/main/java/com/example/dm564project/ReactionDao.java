@@ -11,7 +11,7 @@ import java.util.List;
 
 @Dao
 public interface ReactionDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)// hvis en bruger reagerer flere gange på post bliver den overskrevet.
+    @Insert(onConflict = OnConflictStrategy.REPLACE)// hvis en bruger reagerer flere gange på en post bliver reaktionen overskrevet.
     void insert( Reaction reaction );
 
     @Query("SELECT * FROM reactions")
@@ -24,7 +24,7 @@ public interface ReactionDao {
     Reaction latest();
 
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE) // når vi henter data fra serveren og indsætter i databasen er der nogle gange reaktioner der ikke overholder unique constraints, hvorfor vi bliver nødt til at gøre noget ved dem.
     void addAll(List<Reaction> reactions);
 
     @Query("SELECT * FROM reactions WHERE synced = 0")

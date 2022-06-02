@@ -24,12 +24,6 @@ public class Post extends DBEntity {
 
     public String content;
 
-    //public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
-
-    public long seconds;
-
-    public int nanos;
-
     public boolean synced;
 
     public Post(int id, String userId, String content, boolean synced, long seconds, int nanos){

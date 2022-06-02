@@ -23,12 +23,6 @@ public class User extends DBEntity {
 
     public boolean synced;
 
-    //public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
-
-    public long seconds; // Creation time of this user in seconds since the epoch of 1970-01-01T00:00:00Z
-
-    public int nanos; // The nanosecond component of the creation time. Always between 0 and 999 999 999.
-
     public User(String id, String name, boolean synced, long seconds, int nanos){
         this.id = id;
         this.name = name;
