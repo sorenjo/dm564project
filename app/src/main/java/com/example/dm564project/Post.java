@@ -26,6 +26,14 @@ public class Post extends DBEntity {
 
     public boolean synced;
 
+    /**
+     * constructs a Post from given values.
+     * @param id Unique id for this post.
+     * @param userId The id of the user creating this post.
+     * @param synced The synchronization status of this post. Does it exist in the remote database?
+     * @param seconds The seconds component of the timestamp in seconds since the java epoch of 1970-01-01T00:00:00Z
+     * @param nanos The nanosecond component of the timestamp.
+     */
     public Post(int id, String userId, String content, boolean synced, long seconds, int nanos){
         this.id = id;
         this.userId = userId;
@@ -34,9 +42,18 @@ public class Post extends DBEntity {
         this.nanos = nanos;
         this.synced = synced;
     }
+
+    /**
+     * Constructs a new empty Post.
+     */
     public Post(){
     }
 
+    /**
+     * Returns a post represented by the given JSONObject, with synced set to true.
+     * @param jsonObject The JSONObject representing a post.
+     * @return The post.
+     */
     public static Post ofJSONObject(JSONObject jsonObject){
         Post post = new Post();
         try {
@@ -52,7 +69,11 @@ public class Post extends DBEntity {
         }
         return post;
     }
-
+    /**
+     * Returns the given post as JSONObject representation, with only attributes id, user_id and content.
+     * @param post The post to convert to JSON.
+     * @return A JSONObject representing the given post.
+     */
     public static JSONObject toJSONObject(Post post){
         JSONObject jsonObject = new JSONObject();
         try{
@@ -65,6 +86,10 @@ public class Post extends DBEntity {
         return jsonObject;
     }
 
+    /**
+     * Returns a textual representation of this post.
+     * @return a textual representation of this post.
+     */
     public String toString(){
         return id + userId + content;
     }

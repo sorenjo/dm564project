@@ -7,6 +7,11 @@ public class DBEntity {
 
     public int nanos; // The nanosecond component of the creation time. Always between 0 and 999 999 999.
 
+    /**
+     * Returns the timestamp of the given entity.
+     * @param entity The entity to read the timestamp from.
+     * @return An java.time.Instant representing the timestamp.
+     */
     public static Instant instant(DBEntity entity){
         Instant instant = Instant.ofEpochSecond(0);
         if(entity != null)

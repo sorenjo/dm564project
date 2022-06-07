@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey;
         @ForeignKey(entity = Post.class, parentColumns = "id",
                     childColumns = "postId", onDelete = ForeignKey.CASCADE)
 })
-public class Comment {
+public class Comment extends DBEntity {
 
     @PrimaryKey
     @NonNull
@@ -23,14 +23,13 @@ public class Comment {
 
     public String comment;
 
-    public long stamp; //In milliseconds since the epoch of 1970-01-01T00:00:00Z.
-
-    public Comment(int id, String userId, int postId, String comment, long stamp ){
+    public Comment(int id, String userId, int postId, String comment, long seconds, int nanos){
         this.id = id;
         this.userId = userId;
         this.postId = postId;
         this.comment = comment;
-        this.stamp = stamp;
+        this.seconds = seconds;
+        this.nanos = nanos;
     }
 
     public Comment() {

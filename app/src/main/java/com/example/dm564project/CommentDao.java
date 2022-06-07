@@ -21,7 +21,7 @@ public interface CommentDao {
     @Query("SELECT * FROM comments WHERE postId=:postId")
     List<Comment> getFromPost( int postId );
 
-    @Query("SELECT MAX(stamp) FROM comments")
+    @Query("SELECT * FROM comments ORDER BY seconds DESC, nanos DESC LIMIT 1")
     long lastComment();
 
     @Query("SELECT MAX(id+1) FROM comments")

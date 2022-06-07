@@ -37,35 +37,40 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
             if( User.active == null) {
                 // user anonymous, reacting disabled
-                likeButton.setVisibility( View.GONE );
-                hateButton.setVisibility( View.GONE );
-                careButton.setVisibility( View.GONE );
-                unreactButton.setVisibility( View.GONE );
+                likeButton.setVisibility(View.GONE);
+                hateButton.setVisibility(View.GONE);
+                careButton.setVisibility(View.GONE);
+                unreactButton.setVisibility(View.GONE);
             }
 
-            AppDatabase db = AppDatabase.getAppDatabase( view.getContext() );
+            AppDatabase db = AppDatabase.getAppDatabase(view.getContext());
             ReactionDao reactionDao = db.reactionDao();
 
             likeButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.LIKE, false ));
+                reactionDao.insert(new Reaction(User.active.id, post.id, Reaction.LIKE, false, 0, 0));
+                db.syncDatabase();
             });
 
             hateButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.HATE, false ));
+                reactionDao.insert(new Reaction(User.active.id, post.id, Reaction.HATE, false, 0, 0));
+                db.syncDatabase();
             });
 
             careButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.COULDNT_CARE_LESS, false ));
+                reactionDao.insert(new Reaction(User.active.id, post.id, Reaction.COULDNT_CARE_LESS, false, 0, 0));
+                db.syncDatabase();
             });
 
             unreactButton.setOnClickListener(v -> {
-                reactionDao.insert(new Reaction( User.active.id, post.id, Reaction.REACTION_DELETED, false ));
+                reactionDao.insert(new Reaction(User.active.id, post.id, Reaction.REACTION_DELETED, false, 0, 0));
+                db.syncDatabase();
             });
 
+            // goto postdetailactivity when a post is clicked.
             view.setOnClickListener(v -> {
                 Context context = v.getContext();
-                Intent intent = new Intent( context, PostDetailActivity.class );
-                intent.putExtra("postId", post.id );//TODO det her navn bør nok være en konstant tilhørende den her klasse.
+                Intent intent = new Intent(context, PostDetailActivity.class);
+                intent.putExtra("postId", post.id);
                 context.startActivity(intent);
             });
         }
@@ -92,7 +97,7 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.post = posts.get( position );
-        holder.getTextView().setText( holder.post.userId + " :" ); //TODO Do not concatenate text displayed with `setText`. Use resource string with placeholders.
+        holder.getTextView().setText( holder.post.userId + " :" );
         holder.getTextView2().setText( posts.get( position ).content );
 
     }

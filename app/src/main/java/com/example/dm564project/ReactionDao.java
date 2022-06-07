@@ -24,7 +24,7 @@ public interface ReactionDao {
     Reaction latest();
 
     @Transaction
-    @Insert(onConflict = OnConflictStrategy.REPLACE) // når vi henter data fra serveren og indsætter i databasen er der nogle gange reaktioner der ikke overholder unique constraints, hvorfor vi bliver nødt til at gøre noget ved dem.
+    @Insert(onConflict = OnConflictStrategy.IGNORE) // når vi henter data fra serveren og indsætter i databasen er der nogle gange reaktioner der ikke overholder unique constraints eller foreign key constraints, hvorfor vi bliver nødt til at gøre noget ved dem.
     void addAll(List<Reaction> reactions);
 
     @Query("SELECT * FROM reactions WHERE synced = 0")

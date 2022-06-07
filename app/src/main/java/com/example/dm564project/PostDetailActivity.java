@@ -24,9 +24,9 @@ public class PostDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        db = AppDatabase.getAppDatabase( this );
+        db = AppDatabase.getAppDatabase(this);
         Intent intent = getIntent();
-        post = db.postDao().findById( intent.getIntExtra( "postId",0 ) );
+        post = db.postDao().findById( intent.getIntExtra("postId",0));
 
         setContentView(R.layout.activity_post_detail);
         userText = findViewById(R.id.userText);
@@ -41,10 +41,10 @@ public class PostDetailActivity extends AppCompatActivity {
         recyclerViewComments.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerViewComments.setItemAnimator(new DefaultItemAnimator());
 
-        if( User.active == null) {
+        if (User.active == null) {
             // user anonymous, posting disabled
-            findViewById( R.id.addCommentButton ).setEnabled( false );
-            findViewById( R.id.editTextCommentContent ).setEnabled( false );
+            findViewById(R.id.addCommentButton).setEnabled( false );
+            findViewById(R.id.editTextCommentContent).setEnabled(false);
         }
 
         init();
@@ -58,13 +58,13 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     public void createComment(View view) {
-        AppDatabase db = AppDatabase.getAppDatabase( getApplicationContext() );
+        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
         CommentDao commentDao = db.commentDao();
         EditText commentEditText = findViewById( R.id.editTextCommentContent);
 
         String commentContent = commentEditText.getText().toString();
         commentEditText.setText("Comment");
-        commentDao.insert( new Comment( commentDao.nextId(), User.active.id, post.id, commentContent,0) );
+        commentDao.insert(new Comment( commentDao.nextId(), User.active.id, post.id, commentContent, 0, 0));
         init();
     }
 }

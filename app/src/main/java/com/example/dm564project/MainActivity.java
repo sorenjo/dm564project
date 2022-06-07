@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         String userId = id.getText().toString();
         String username = name.getText().toString();
 
+        // check if the user id is available
         if (userDao.doesExist(userId))
             Toast.makeText(getApplicationContext(), "Username is already in use", Toast.LENGTH_SHORT).show();
         else {

@@ -24,6 +24,7 @@ public class PostsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posts);
         db = AppDatabase.getAppDatabase(getApplicationContext());
+        db.syncDatabase();
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         recyclerView = findViewById(R.id.recyclerView);
@@ -33,16 +34,16 @@ public class PostsActivity extends AppCompatActivity {
 
         if( User.active == null) {
             // user anonymous, posting disabled
-            findViewById( R.id.addPostButton ).setEnabled( false );
-            findViewById( R.id.editTextPostContent ).setEnabled( false );
+            findViewById(R.id.addPostButton).setEnabled(false);
+            findViewById(R.id.editTextPostContent).setEnabled(false);
         }
 
         init();
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            swipeRefreshLayout.setRefreshing( false );
+            swipeRefreshLayout.setRefreshing(false);
             db.syncDatabase();
-            init();
+            init(); //get the all the posts again and display them anew.
         });
     }
 
@@ -52,13 +53,13 @@ public class PostsActivity extends AppCompatActivity {
     }
 
     public void createPost(View view) {
-        AppDatabase db = AppDatabase.getAppDatabase( getApplicationContext() );
+        AppDatabase db = AppDatabase.getAppDatabase(getApplicationContext());
         PostDao postDao = db.postDao();
-        EditText postContentEditText = findViewById( R.id.editTextPostContent );
+        EditText postContentEditText = findViewById(R.id.editTextPostContent);
 
         String postContent = postContentEditText.getText().toString();
         postContentEditText.setText("Post content");
-        postDao.insert( new Post( postDao.nextId(), User.active.id, postContent, false, 0, 0) );
+        postDao.insert(new Post(postDao.nextId(), User.active.id, postContent, false, 0, 0));
         db.syncDatabase();
         init();
     }

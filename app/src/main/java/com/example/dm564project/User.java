@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Entity(tableName = "users")
 public class User extends DBEntity {
-    public static User active;
+    public static User active; // holds the active user.
 
     @PrimaryKey
     @NonNull
@@ -23,6 +23,15 @@ public class User extends DBEntity {
 
     public boolean synced;
 
+
+    /**
+     * constructs a user from given values.
+     * @param id The user's id.
+     * @param name The user's name.
+     * @param synced The synchronization status of this user. Does it exist in the remote database?
+     * @param seconds The seconds component of the timestamp in seconds since the java epoch of 1970-01-01T00:00:00Z
+     * @param nanos The nanosecond component of the timestamp.
+     */
     public User(String id, String name, boolean synced, long seconds, int nanos){
         this.id = id;
         this.name = name;
@@ -31,6 +40,9 @@ public class User extends DBEntity {
         this.nanos = nanos;
     }
 
+    /**
+     * Constructs a new anonymous user.
+     */
     public User(){
         id = "anon";
         name = null;
@@ -39,6 +51,11 @@ public class User extends DBEntity {
         nanos = 0;
     }
 
+    /**
+     * Returns a user represented by the given JSONObject, with synced set to true.
+     * @param jsonObject The JSONObject representing a user.
+     * @return The user.
+     */
     public static User ofJSONObject(JSONObject jsonObject){
         User user = new User();
         try {
@@ -54,6 +71,11 @@ public class User extends DBEntity {
         return user;
     }
 
+    /**
+     * Returns the given user as JSONObject representation, with only attributes id and name.
+     * @param user The user to convert to JSON.
+     * @return A JSONObject representing the given user.
+     */
     public static JSONObject toJSONObject(User user){
         JSONObject jsonObject = new JSONObject();
         try {
@@ -65,6 +87,10 @@ public class User extends DBEntity {
         return jsonObject;
     }
 
+    /**
+     * Returns a textual representation of this post.
+     * @return a textual representation of this post.
+     */
     public String toString(){
         return id + " " + name + " " + synced + " " + seconds + " " + nanos;
     }
