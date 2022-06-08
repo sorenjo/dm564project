@@ -16,13 +16,13 @@ import java.util.List;
 
 public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
-    private List<Post> posts;
+    private List<PostWithUserName> posts;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final TextView textView2;
 
-        private Post post;
+        private PostWithUserName post;
 
         public ViewHolder(View view){
             super(view);
@@ -84,7 +84,7 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
         }
     }
 
-    public PostAdaptor(List<Post> posts){
+    public PostAdaptor(List<PostWithUserName> posts){
         this.posts = posts;
     }
 
@@ -96,9 +96,9 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.post = posts.get( position );
-        holder.getTextView().setText( holder.post.userId + " :" );
-        holder.getTextView2().setText( posts.get( position ).content );
+        holder.post = posts.get(position);
+        holder.getTextView().setText(holder.post.userName);
+        holder.getTextView2().setText(posts.get( position ).content);
 
     }
 

@@ -15,10 +15,10 @@ public interface ReactionDao {
     void insert( Reaction reaction );
 
     @Query("SELECT * FROM reactions")
-    List< Reaction > getAll();
+    List<Reaction> getAll();
 
-    @Query("SELECT * FROM reactions WHERE postId=:postId")
-    List< Reaction > getFor( int postId );
+    @Query("SELECT userId, postId, type, r.synced AS synced, u.name AS userName, r.seconds AS seconds, r.nanos AS nanos FROM reactions r JOIN users u ON r.userId = u.id AND r.postId = :postId")
+    List<ReactionWithUserName> getFor(int postId);
 
     @Query("SELECT * FROM reactions ORDER BY seconds DESC, nanos DESC LIMIT 1")
     Reaction latest();

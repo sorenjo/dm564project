@@ -31,10 +31,6 @@ public interface UserDao {
     boolean doesExist(String uid);
 
     @Transaction
-    @Query( "SELECT * FROM users" )
-    List< UserWithPosts > getUserPosts();
-
-    @Transaction
     @Insert
     void addAll( List< User > users );
 

@@ -18,8 +18,8 @@ public interface CommentDao {
     @Query("SELECT * FROM comments")
     List<Comment> getAll();
 
-    @Query("SELECT * FROM comments WHERE postId=:postId")
-    List<Comment> getFromPost( int postId );
+    @Query("SELECT c.seconds AS seconds, c.nanos AS nanos, c.id AS id, userId, postId, comment, u.name AS userName FROM comments c JOIN users u ON c.userId = u.id AND c.postId = :postId")
+    List<CommentWithUserName> getFromPost( int postId );
 
     @Query("SELECT * FROM comments ORDER BY seconds DESC, nanos DESC LIMIT 1")
     long lastComment();

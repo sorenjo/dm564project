@@ -18,7 +18,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private RecyclerView recyclerViewReactions;
     private RecyclerView recyclerViewComments;
     private AppDatabase db;
-    private Post post;
+    private PostWithUserName post;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class PostDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_detail);
         userText = findViewById(R.id.userText);
         contentText = findViewById(R.id.contentText);
-        userText.setText( post.userId );
+        userText.setText( post.userName );
         contentText.setText( post.content );
 
         recyclerViewReactions = findViewById(R.id.recyclerViewReactions);

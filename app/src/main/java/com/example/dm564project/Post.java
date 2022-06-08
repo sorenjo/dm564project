@@ -3,6 +3,7 @@ package com.example.dm564project;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import org.json.JSONException;
@@ -25,6 +26,8 @@ public class Post extends DBEntity {
     public String content;
 
     public boolean synced;
+
+    public String userName;
 
     /**
      * constructs a Post from given values.

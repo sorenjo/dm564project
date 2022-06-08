@@ -12,11 +12,11 @@ import java.util.List;
 
 public class ReactionAdaptor extends RecyclerView.Adapter<ReactionAdaptor.ReactionViewHolder> {
 
-    private List<Reaction> reactions;
+    private List<ReactionWithUserName> reactions;
 
     public static class ReactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView reactionTextView;
-        private Reaction reaction;
+        private ReactionWithUserName reaction;
 
         public ReactionViewHolder(View view){
             super(view);
@@ -28,7 +28,7 @@ public class ReactionAdaptor extends RecyclerView.Adapter<ReactionAdaptor.Reacti
         }
     }
 
-    public ReactionAdaptor(List< Reaction > reactions ){
+    public ReactionAdaptor(List<ReactionWithUserName> reactions ){
         this.reactions = reactions;
     }
 
@@ -41,7 +41,7 @@ public class ReactionAdaptor extends RecyclerView.Adapter<ReactionAdaptor.Reacti
     @Override
     public void onBindViewHolder(@NonNull ReactionViewHolder holder, int position){
         holder.reaction = reactions.get(position);
-        holder.getReactionTextView().setText(holder.reaction.userId + Reaction.reactionTexts[holder.reaction.type] + "this post");
+        holder.getReactionTextView().setText(holder.reaction.userName + Reaction.reactionTexts[holder.reaction.type] + "this post");
     }
 
     @Override

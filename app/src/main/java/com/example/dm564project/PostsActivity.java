@@ -48,7 +48,7 @@ public class PostsActivity extends AppCompatActivity {
     }
 
     private void init() {
-        PostAdaptor postAdaptor = new PostAdaptor(db.postDao().getAll());
+        PostAdaptor postAdaptor = new PostAdaptor(db.postDao().withUserNames());
         recyclerView.setAdapter(postAdaptor);
     }
 
