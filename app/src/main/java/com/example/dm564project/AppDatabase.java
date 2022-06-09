@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
-@Database(entities = {User.class, Post.class, Reaction.class, Comment.class}, version = 1)
+@Database(entities = {User.class, Post.class, Reaction.class, Comment.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase AppDB;
 
@@ -151,16 +151,6 @@ public abstract class AppDatabase extends RoomDatabase {
      */
     private void syncDownUpReaction(){
         ReactionDao reactionDao = reactionDao();
-        //download reactions
-        try{
-            getMultiApplyConsume(
-                new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest())),
-                Reaction::ofJSONObject,
-                reactionDao::addAll
-            );
-        } catch(Exception e){
-            e.printStackTrace();
-        }
         //upload reactions
         reactionDao.unSynced().stream().map(Reaction::toJSONObject).filter(jsonObject -> {
             boolean success = false;
@@ -183,6 +173,16 @@ public abstract class AppDatabase extends RoomDatabase {
                 e.printStackTrace();
             }
         });
+        //download reactions
+        try{
+            getMultiApplyConsume(
+                    new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest())),
+                    Reaction::ofJSONObject,
+                    reactionDao::addAll
+            );
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**

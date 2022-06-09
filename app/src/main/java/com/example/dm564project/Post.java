@@ -27,8 +27,6 @@ public class Post extends DBEntity {
 
     public boolean synced;
 
-    public String userName;
-
     /**
      * constructs a Post from given values.
      * @param id Unique id for this post.
