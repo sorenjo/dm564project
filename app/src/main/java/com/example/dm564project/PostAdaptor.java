@@ -2,6 +2,7 @@ package com.example.dm564project;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
@@ -19,16 +19,18 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
     private List<PostWithUserName> posts;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
-        private final TextView textView2;
+        private final TextView userText;
+        private final TextView contentText;
+        private final TextView timeText;
 
         private PostWithUserName post;
 
         public ViewHolder(View view){
             super(view);
 
-            textView = view.findViewById(R.id.textView2);
-            textView2 = view.findViewById(R.id.textView3);
+            userText = view.findViewById(R.id.postUserText);
+            contentText = view.findViewById(R.id.postContentText);
+            timeText = view.findViewById(R.id.timePostText);
 
             Button likeButton = view.findViewById(R.id.btnLike);
             Button hateButton = view.findViewById(R.id.btnHate);
@@ -75,12 +77,16 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
             });
         }
 
-        public TextView getTextView() {
-            return textView;
+        public TextView getUserText() {
+            return userText;
         }
 
-        public TextView getTextView2() {
-            return textView2;
+        public TextView getContentText() {
+            return contentText;
+        }
+
+        public TextView getTimeText() {
+            return timeText;
         }
     }
 
@@ -97,9 +103,9 @@ public class PostAdaptor extends RecyclerView.Adapter<PostAdaptor.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.post = posts.get(position);
-        holder.getTextView().setText(holder.post.userName);
-        holder.getTextView2().setText(posts.get( position ).content);
-
+        holder.getUserText().setText(holder.post.userName);
+        holder.getTimeText().setText(" • " + DateUtils.getRelativeTimeSpanString(DBEntity.instant(holder.post).toEpochMilli()));
+        holder.getContentText().setText(posts.get( position ).content);
     }
 
     @Override

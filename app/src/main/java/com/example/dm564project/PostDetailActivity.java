@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,6 +16,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private TextView userText;
     private TextView contentText;
+    private TextView timeText;
     private RecyclerView recyclerViewReactions;
     private RecyclerView recyclerViewComments;
     private AppDatabase db;
@@ -31,7 +33,9 @@ public class PostDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_detail);
         userText = findViewById(R.id.userText);
         contentText = findViewById(R.id.contentText);
-        userText.setText( post.userName );
+        timeText = findViewById(R.id.postTime);
+        userText.setText(post.userName);
+        timeText.setText(" • " + DateUtils.getRelativeTimeSpanString(DBEntity.instant(post).toEpochMilli()));
         contentText.setText( post.content );
 
         recyclerViewReactions = findViewById(R.id.recyclerViewReactions);

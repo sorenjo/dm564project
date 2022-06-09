@@ -6,25 +6,30 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/postUserText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="TextView"
         android:textAllCaps="false"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
+        android:id="@+id/postContentText"
+        android:layout_width="372dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="5"
         android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/postUserText" />
 
     <Button
         android:id="@+id/btnLike"
@@ -34,7 +39,7 @@
         android:layout_marginTop="16dp"
         android:text="Like"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/postContentText" />
 
     <Button
         android:id="@+id/btnHate"
@@ -44,7 +49,7 @@
         android:layout_marginTop="16dp"
         android:text="Hate"
         app:layout_constraintStart_toEndOf="@+id/btnLike"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/postContentText" />
 
     <Button
         android:id="@+id/btnCare"
@@ -65,5 +70,13 @@
         android:text="Unreact"
         app:layout_constraintStart_toEndOf="@+id/btnCare"
         app:layout_constraintTop_toBottomOf="@+id/btnHate" />
+
+    <TextView
+        android:id="@+id/timePostText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="@+id/postUserText"
+        app:layout_constraintStart_toEndOf="@+id/postUserText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
