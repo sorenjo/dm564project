@@ -7,6 +7,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -25,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.stream.Stream;
 
 @Database(entities = {User.class, Post.class, Reaction.class, Comment.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
@@ -73,39 +75,31 @@ public abstract class AppDatabase extends RoomDatabase {
      */
     private void syncDownUpUser(){
         UserDao userDao = userDao();
+        //download users
         try{
-            //download users
-            getMultiApplyConsume(
-                new URL("https://caracal.imada.sdu.dk/app2022/users?stamp=gt." + DBEntity.instant(userDao.latest())),
-                User::ofJSONObject,
-                userDao::addAll
-            );
-            //upload users
-            userDao.unSynced().stream().map(User::toJSONObject).filter(jsonObject -> {
-                boolean success = false;
-                try {
-                    success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/users"), jsonObject) == HttpURLConnection.HTTP_CREATED;
-                } catch(MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                return success;
-            })
-            // update timestamps of newly uploaded entities in the local database.
-            .forEach(jsonObject -> {
-                try {
-                    getSingleApplyConsume(
-                        new URL("https://caracal.imada.sdu.dk/app2022/users?id=eq."+ jsonObject.getString("id")),
-                        User::ofJSONObject,
-                        userDao::update
-                        );
-                } catch(Exception e){
-                    e.printStackTrace();
-                }
-            });
-        } catch ( Exception e ){
+            List<User> users = JSONObjectStream(getJSONArray(new URL("https://caracal.imada.sdu.dk/app2022/users?stamp=gt." + DBEntity.instant(userDao.latest()))))
+                .map(User::ofJSONObject)
+                .collect(Collectors.toList());
+            userDao.addAll(users);
+        } catch(Exception e) {
             e.printStackTrace();
         }
+        //upload users
+        userDao.unSynced().stream()
+            .map(User::toJSONObject)
+            .map( jsonObject -> {
+                JSONObject returnJson = new JSONObject();
+                try {
+                    returnJson = postTo(new URL("https://caracal.imada.sdu.dk/app2022/users"), jsonObject);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                return returnJson;
+            })
+            .map(User::ofJSONObject)
+            .forEach(userDao::update);
     }
+
 
     /**
      * Synchronizes the posts relation of this database.
@@ -114,144 +108,119 @@ public abstract class AppDatabase extends RoomDatabase {
         PostDao postDao = postDao();
         // download posts
         try{
-            getMultiApplyConsume(
-                new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + DBEntity.instant(postDao.latest())),
-                Post::ofJSONObject,
-                postDao::addAll
-            );
+            List<Post> posts = JSONObjectStream(getJSONArray(new URL("https://caracal.imada.sdu.dk/app2022/posts?stamp=gt." + DBEntity.instant(postDao.latest()))))
+                .map(Post::ofJSONObject)
+                .collect(Collectors.toList());
+            postDao.addAll(posts);
         } catch(Exception e){
             e.printStackTrace();
         }
         //upload posts
-        postDao.unSynced().stream().map(Post::toJSONObject).filter(jsonObject -> {
-            boolean success = false;
-            try{
-                success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/posts"), jsonObject) == HttpURLConnection.HTTP_CREATED;
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-            return success;
-        })
-        // update timestamps of newly uploaded entities in the local database.
-        .forEach(jsonObject -> {
-            try{
-                getSingleApplyConsume(
-                    new URL("https://caracal.imada.sdu.dk/app2022/posts?id=eq." + jsonObject.getString("id")),
-                    Post::ofJSONObject,
-                    postDao::update
-                );
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-        });
+        postDao.unSynced().stream()
+            .map(Post::toJSONObject)
+            .map(jsonObject -> {
+                JSONObject returnJson = new JSONObject();
+                try {
+                    returnJson = postTo(new URL("https://caracal.imada.sdu.dk/app2022/posts"), jsonObject);
+                } catch(MalformedURLException e){
+                    e.printStackTrace();
+                }
+                return returnJson;
+            })
+            .map(Post::ofJSONObject)
+            .forEach(postDao::update);
     }
 
     /**
      * Synchronizes the reactions relation of this database.
      */
-    private void syncDownUpReaction(){
+    private void syncDownUpReaction() {
         ReactionDao reactionDao = reactionDao();
         //upload reactions
-        reactionDao.unSynced().stream().map(Reaction::toJSONObject).filter(jsonObject -> {
-            boolean success = false;
-            try{
-                success = postTo(new URL("https://caracal.imada.sdu.dk/app2022/reactions"), jsonObject) == HttpURLConnection.HTTP_CREATED;
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-            return success;
-        })
-        // update timestamps of newly uploaded entities in the local database.
-        .forEach(jsonObject -> {
-            try{
-                getSingleApplyConsume(
-                    new URL("https://caracal.imada.sdu.dk/app2022/reactions?user_id=eq." + jsonObject.getString("user_id") + "&post_id=eq." + jsonObject.getString("post_id")),
-                    Reaction::ofJSONObject,
-                    reactionDao::update
-                );
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-        });
+        reactionDao.unSynced().stream()
+            .map(Reaction::toJSONObject)
+            .map(jsonObject -> {
+                JSONObject returnJson = new JSONObject();
+                try{
+                    returnJson = postTo(new URL("https://caracal.imada.sdu.dk/app2022/reactions"), jsonObject);
+                } catch(MalformedURLException e){
+                    e.printStackTrace();
+                }
+                return  returnJson;
+            })
+            .map(Reaction::ofJSONObject)
+            .forEach(reactionDao::update);
         //download reactions
         try{
-            getMultiApplyConsume(
-                    new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest())),
-                    Reaction::ofJSONObject,
-                    reactionDao::addAll
-            );
+            List<Reaction> reactions = JSONObjectStream(getJSONArray(new URL("https://caracal.imada.sdu.dk/app2022/reactions?stamp=gt." + DBEntity.instant(reactionDao.latest()))))
+                .map(Reaction::ofJSONObject)
+                .collect(Collectors.toList());
+            reactionDao.addAll(reactions);
         } catch(Exception e){
             e.printStackTrace();
         }
     }
 
     /**
-     * Downloads jsonarray from given url, applies the given function on each element, accumulates that to a list then consumes it using the given consumer.
-     * @param url The url to download from.
-     * @param function The function to apply on each downloaded JSONObject.
-     * @param consumer The consumer to consume the elements.
+     * Parses the http get response of the given url as a jsonarray and returns it.
+     * @param url The url to perform the post to.
+     * @return The jsonarray.
      */
-    private <E> void getMultiApplyConsume(URL url, Function<JSONObject, E> function, Consumer<List<E>> consumer){
-        try{
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("accept", "application/json");
-            InputStream is = connection.getInputStream();
-            String json = new BufferedReader(new InputStreamReader( new BufferedInputStream(is))).lines().collect(Collectors.joining("\n"));
-            is.close();
-            connection.disconnect();
-            JSONArray jsonArray = new JSONArray(json);
-            List<E> elements = new ArrayList<>();
-            for(int i = 0; i < jsonArray.length(); i++)
-                elements.add(function.apply(jsonArray.getJSONObject(i)));
-            consumer.accept(elements);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gets a the first element from the given url's jsonarray and applies given function before consuming it with the given consumer.
-     * @param url The url to download from.
-     * @param function The function to apply on the downloaded JSONObject.
-     * @param consumer The consumer to consume the element.
-     */
-    private <E> void getSingleApplyConsume(URL url, Function<JSONObject, E> function, Consumer<E> consumer){
+    private JSONArray getJSONArray(URL url){
+        JSONArray jsonArray = new JSONArray();
         try{
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("accept", "application/json");
             String json = new BufferedReader(new InputStreamReader( new BufferedInputStream(connection.getInputStream()))).lines().collect(Collectors.joining("\n"));
-            JSONObject jsonObject = new JSONArray(json).getJSONObject(0);
-            E element = function.apply(jsonObject);
-            consumer.accept(element);
+            jsonArray = new JSONArray(json);
         } catch(Exception e){
             e.printStackTrace();
         }
+        return jsonArray;
     }
 
     /**
      * Perform a post with the given payload to the given url.
      * Precondition: the url is a http/s url.
-     * @return the http response code.
+     * @return If successful the newly uploaded object, else an empty JSONObject.
      */
-    private int postTo(URL url, JSONObject payload ) {
-        int status = 0;
+    private JSONObject postTo(URL url, JSONObject payload ) {
+        JSONObject jsonObject = new JSONObject();
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput( true );
             connection.setRequestMethod( "POST" );
             connection.setRequestProperty( "Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBwMjAyMiJ9.iEPYaqBPWoAxc7iyi507U3sexbkLHRKABQgYNDG4Awk" );
             connection.setRequestProperty( "Content-Type", "application/json");
+            connection.setRequestProperty("Prefer", "return=representation"); // gets the newly uploaded object
+            connection.setRequestProperty("accept", "application/json");
             DataOutputStream os = new DataOutputStream( connection.getOutputStream() );
-            System.out.println( payload );
             os.write( payload.toString().getBytes() );
             os.flush();
+            String json = new BufferedReader(new InputStreamReader( new BufferedInputStream(connection.getInputStream()))).lines().collect(Collectors.joining("\n"));
+            System.out.println(json);
+            jsonObject = new JSONArray(json).getJSONObject(0);
             os.close();
-            System.out.println(connection.getResponseCode() + " " + connection.getResponseMessage() );
-            status = connection.getResponseCode();
             connection.disconnect();
-        } catch ( IOException e ){
+        } catch ( Exception e ){
             e.printStackTrace();
         }
-        return status;
+        return jsonObject;
+    }
+
+    /**
+     * Convert a JSONArray to a Stream<JSONObject>
+     * @param jsonArray The jsonarray to convert from.
+     * @return The stream of jsonobjects.
+     */
+    private Stream<JSONObject> JSONObjectStream(JSONArray jsonArray){
+        Stream.Builder<JSONObject> streamBuilder = Stream.builder();
+        try {
+            for (int i = 0; i < jsonArray.length(); i++)
+                streamBuilder.accept(jsonArray.getJSONObject(i));
+        } catch(JSONException e){
+            e.printStackTrace();
+        }
+        return streamBuilder.build();
     }
 }
